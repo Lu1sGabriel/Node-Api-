@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserAchievements {
+  id            String   @id @default(uuid())
+  achievementId String
+  userId        String
+  createdAt     DateTime @default(now())
+
+  user        Users        @relation(fields: [userId], references: [id])
+  achievement Achievements @relation(fields: [achievementId], references: [id])
+
+  @@map("user_achievements")
+}
+
+model Achievements {
+  id        String   @id @default(uuid())
+  name      String
+  criterion String
+  createdAt DateTime @default(now())
+
+  userAchievements UserAchievements[]
+
+  @@map("achievements")
+}
+
+model ActivityAddresses {
+  id         String   @id @default(uuid())
+  activityId String   @unique
+  latitude   Float
+  longitude  Float
+  createdAt  DateTime @default(now())
+
+  activity Activities @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@map("activity_addresses")
+}
+
+model Activities {
+  id               String    @id @default(uuid())
+  title            String
+  description      String
+  type             String
+  confirmationCode String
+  image            String
+  scheduledDate    DateTime
+  createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
+  completedAt      DateTime?
+  private          Boolean
+  creatorId        String
+
+  activityAddress      ActivityAddresses?
+  activityParticipants ActivityParticipants[]
+  activityType         ActivityTypes          @relation(fields: [type], references: [id])
+  creator              Users                  @relation(fields: [creatorId], references: [id])
+
+  @@unique([title, scheduledDate])
+  @@map("activities")
+}
+
+model Users {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  cpf       String    @unique
+  password  String
+  avatar    String    @default("default-avatar.png")
+  xp        Int       @default(0)
+  level     Int       @default(1)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  preferences          Preferences[]
+  userAchievements     UserAchievements[]
+  activityParticipants ActivityParticipants[]
+  activities           Activities[]
+
+  @@map("users")
+}
+
+model Preferences {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  typeId    String
+  createdAt DateTime @default(now())
+
+  user Users @relation(fields: [userId], references: [id])
+
+  @@map("preferences")
+}
+
+model ActivityParticipants {
+  id          String    @id @default(uuid())
+  activityId  String
+  userId      String
+  approved    Boolean
+  confirmedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  activity Activities @relation(fields: [activityId], references: [id])
+  user     Users      @relation(fields: [userId], references: [id])
+
+  @@unique([activityId, userId])
+  @@map("activity_participants")
+}
+
+model ActivityTypes {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  image       String
+  createdAt   DateTime @default(now())
+
+  activities Activities[]
+
+  @@map("activity_types")
+}
