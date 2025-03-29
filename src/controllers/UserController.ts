@@ -3,12 +3,13 @@ import { UserService } from "../services/UserService";
 import { CreateUserDTO, UpdateUserDTO } from "../dtos/UserDTO";
 
 export default function userController(server: Express): void {
+
     const router = Router();
     const userService = new UserService();
 
     server.use("/api/user", router);
 
-    router.post("/", async (req: Request, res: Response) => {
+    router.post("/register", async (req: Request, res: Response) => {
         const { name, email, cpf, password, avatar } = req.body;
         const dto = new CreateUserDTO(name, email, cpf, password, avatar);
 
@@ -37,6 +38,13 @@ export default function userController(server: Express): void {
         const user = await userService.findByEmail(email);
 
         res.status(200).json({ status: "success", data: user });
+    });
+
+    router.delete("/:id", async (req: Request, res: Response) => {
+        const { id } = req.params;
+        await userService.delete(id);
+
+        res.status(204).json({ status: "success", message: "User deleted successfully" });
     });
 
 }

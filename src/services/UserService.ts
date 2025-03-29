@@ -68,6 +68,14 @@ export class UserService implements IUserService {
         return user;
     }
 
+    public async delete(id: string): Promise<void> {
+        const user = await this.userRepository.findById(id);
+        if (!user) {
+            throw new AppError("Usuário não encontrado", 404);
+        }
+        await this.userRepository.delete(id);
+    }
+
     private async validateUniqueFields(email: string, cpf: string): Promise<void> {
         const emailExists = await this.userRepository.findByEmail(email);
         const cpfExists = await this.userRepository.findByCpf(cpf);
