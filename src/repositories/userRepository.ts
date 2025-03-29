@@ -1,10 +1,10 @@
-import prisma from "../orm/prisma";
+import Prisma from "../orms/Prisma";
 import { CreateUserDTO, UpdateUserDTO } from "../dtos/UserDTO";
 
 export default class UserRepository {
 
     async findById(id: string): Promise<any> {
-        return await prisma.users.findFirst({
+        return await Prisma.users.findFirst({
             where: {
                 id,
                 deletedAt: null,
@@ -13,7 +13,7 @@ export default class UserRepository {
     }
 
     async findByEmail(email: string): Promise<any> {
-        return await prisma.users.findFirst({
+        return await Prisma.users.findFirst({
             where: {
                 email,
                 deletedAt: null,
@@ -22,26 +22,26 @@ export default class UserRepository {
     }
 
     async create(data: CreateUserDTO) {
-        return await prisma.users.create({
+        return await Prisma.users.create({
             data,
         });
     }
 
     async update(id: string, data: UpdateUserDTO) {
-        return await prisma.users.update({
+        return await Prisma.users.update({
             where: { id },
             data,
         });
     }
 
     async findByCpf(cpf: string) {
-        return await prisma.users.findFirst({
+        return await Prisma.users.findFirst({
             where: { cpf },
         });
     }
 
     async delete(id: string): Promise<any> {
-        return await prisma.users.update({
+        return await Prisma.users.update({
             where: { id },
             data: { deletedAt: new Date() },
         });
