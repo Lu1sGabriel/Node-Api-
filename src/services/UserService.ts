@@ -1,4 +1,4 @@
-import { UserRepository } from "../repositories/UserRepository";
+import UserRepository from "../repositories/userRepository";
 import AppError from "../handler/AppError";
 import { CreateUserDTO, UpdateUserDTO } from "../dtos/UserDTO";
 import { PasswordService } from "./PasswordService ";
@@ -34,17 +34,30 @@ export class UserService implements IUserService {
 
         if (dto.email) {
             await this.validateUniqueEmail(dto.email);
+            user.email = dto.email;
         }
 
         if (dto.password) {
-            dto.password = await this.passwordService.hashPassword(dto.password);
+            user.password = await this.passwordService.hashPassword(dto.password);
         }
 
-        return this.userRepository.update(id, dto);
+        if (dto.name) {
+            user.name = dto.name;
+        }
+
+        if (dto.avatar) {
+            user.avatar = dto.avatar;
+        }
+
+        return this.userRepository.update(id, user);
     }
 
     public async findById(id: string): Promise<any> {
-        return this.findUser(id);
+        const user = await this.userRepository.findById(id);
+        if (!user) {
+            throw new AppError("Usuário não encontrado", 404);
+        }
+        return user;
     }
 
     public async findByEmail(email: string): Promise<any> {
