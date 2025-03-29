@@ -1,5 +1,5 @@
 import UserRepository from "../repositories/UserRepository";
-import AppError from "../handler/AppError";
+import AppError from "../handlers/AppError";
 import { CreateUserDTO, UpdateUserDTO } from "../dtos/UserDTO";
 import { PasswordService } from "./PasswordService ";
 
