@@ -1,6 +1,6 @@
 import { Express, Router, Request, Response } from "express";
 import { UserService } from "../services/UserService";
-import { CreateUserDTO, UpdateUserDTO } from "../dtos/UserDTO";
+import { Create, Update } from "../dtos/UserDTO";
 
 export default function userController(server: Express): void {
 
@@ -25,7 +25,7 @@ export default function userController(server: Express): void {
 
     router.post("/register", async (req: Request, res: Response) => {
         const { name, email, cpf, password, avatar } = req.body;
-        const dto = new CreateUserDTO(name, email, cpf, password, avatar);
+        const dto = new Create(name, email, cpf, password, avatar);
 
         const user = await userService.create(dto);
         res.status(201).json({ status: "success", data: user });
@@ -34,7 +34,7 @@ export default function userController(server: Express): void {
     router.put("/:id", async (req: Request, res: Response) => {
         const { id } = req.params;
         const { name, email, password, avatar } = req.body;
-        const dto = new UpdateUserDTO(name, email, password, avatar);
+        const dto = new Update(name, email, password, avatar);
 
         const updatedUser = await userService.update(id, dto);
         res.status(200).json({ status: "success", data: updatedUser });
