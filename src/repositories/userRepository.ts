@@ -3,7 +3,7 @@ import { CreateUserDTO, UpdateUserDTO } from "../dtos/UserDTO";
 
 export default class UserRepository {
 
-    async findById(id: string): Promise<any> {
+    public async findById(id: string): Promise<any> {
         return await Prisma.users.findFirst({
             where: {
                 id,
@@ -12,7 +12,7 @@ export default class UserRepository {
         });
     }
 
-    async findByEmail(email: string): Promise<any> {
+    public async findByEmail(email: string): Promise<any> {
         return await Prisma.users.findFirst({
             where: {
                 email,
@@ -21,26 +21,26 @@ export default class UserRepository {
         });
     }
 
-    async create(data: CreateUserDTO) {
+    public async create(data: CreateUserDTO) {
         return await Prisma.users.create({
             data,
         });
     }
 
-    async update(id: string, data: UpdateUserDTO) {
+    public async update(id: string, data: UpdateUserDTO) {
         return await Prisma.users.update({
             where: { id },
             data,
         });
     }
 
-    async findByCpf(cpf: string) {
+    public async findByCpf(cpf: string) {
         return await Prisma.users.findFirst({
             where: { cpf },
         });
     }
 
-    async delete(id: string): Promise<any> {
+    public async delete(id: string): Promise<any> {
         return await Prisma.users.update({
             where: { id },
             data: { deletedAt: new Date() },

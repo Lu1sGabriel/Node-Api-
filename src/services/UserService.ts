@@ -15,7 +15,7 @@ export class UserService implements IUserService {
     private readonly userRepository: UserRepository;
     private readonly passwordService: PasswordService;
 
-    constructor(userRepository: UserRepository = new UserRepository(), passwordService: PasswordService = new PasswordService()) {
+    public constructor(userRepository: UserRepository = new UserRepository(), passwordService: PasswordService = new PasswordService()) {
         this.userRepository = userRepository;
         this.passwordService = passwordService;
     }
