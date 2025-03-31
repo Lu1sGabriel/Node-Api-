@@ -53,7 +53,7 @@ model Activities {
   private          Boolean
   creatorId        String
 
-  activityAddress      ActivityAddresses?
+  activityAddress      ActivityAddresses[]
   activityParticipants ActivityParticipants[]
   activityType         ActivityTypes          @relation(fields: [type], references: [id])
   creator              Users                  @relation(fields: [creatorId], references: [id])
@@ -86,7 +86,8 @@ model Preferences {
   userId String @unique
   typeId String
 
-  user Users @relation(fields: [userId], references: [id])
+  user Users         @relation(fields: [userId], references: [id])
+  type ActivityTypes @relation(fields: [typeId], references: [id])
 
   @@map("preferences")
 }
@@ -111,7 +112,8 @@ model ActivityTypes {
   description String
   image       String
 
-  activities Activities[]
+  activities  Activities[]
+  preferences Preferences[]
 
   @@map("activity_types")
 }
