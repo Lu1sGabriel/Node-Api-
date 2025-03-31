@@ -3,8 +3,10 @@ import { UserCreateDTO, UserUpdateDTO } from "../../../presentation/dto/user/Use
 import { PasswordService } from "../password/PasswordService ";
 import { BadRequestError, NotFoundError } from "../../../shared/utils/ApiErrors";
 import IUserService from "./IUserService";
+import Validators from "../../../shared/utils/Validators";
 
 export default class UserService implements IUserService {
+
     private readonly userRepository: UserRepository;
     private readonly passwordService: PasswordService;
 
@@ -17,6 +19,8 @@ export default class UserService implements IUserService {
     }
 
     public async create(dto: UserCreateDTO): Promise<any> {
+        await this.validateFields(dto, false);
+
         await this.validateUniqueFields(dto.email, dto.cpf);
 
         const hashedPassword = await this.passwordService.hashPassword(dto.password);
@@ -26,69 +30,63 @@ export default class UserService implements IUserService {
     }
 
     public async update(id: string, dto: UserUpdateDTO): Promise<any> {
-        const user = await this.findUser(id);
+        const user = await this.findUserById(id);
 
-        if (dto.email) {
-            await this.validateUniqueEmail(dto.email);
-            user.email = dto.email;
-        }
+        await this.validateFields(dto, true);
 
-        if (dto.password) {
-            user.password = await this.passwordService.hashPassword(dto.password);
-        }
-
-        if (dto.name) {
-            user.name = dto.name;
-        }
-
-        if (dto.avatar) {
-            user.avatar = dto.avatar;
-        }
+        Object.assign(user, this.buildUpdateData(dto));
 
         return this.userRepository.update(id, user);
     }
 
     public async findById(id: string): Promise<any> {
-        const user = await this.userRepository.findById(id);
-        if (!user) {
-            throw new NotFoundError("User not found.");
-        }
-        return user;
+        return this.findUserById(id);
     }
 
     public async findByEmail(email: string): Promise<any> {
         const user = await this.userRepository.findByEmail(email);
-        if (!user) {
-            throw new NotFoundError("User not found.");
-        }
+        if (!user) throw new NotFoundError("User not found.");
         return user;
     }
 
     public async delete(id: string): Promise<void> {
-        const user = await this.userRepository.findById(id);
-        if (!user) {
-            throw new NotFoundError("User not found.");
-        }
+        await this.findUserById(id);
         await this.userRepository.delete(id);
     }
 
-    private async validateUniqueFields(email: string, cpf: string): Promise<void> {
-        const emailExists = await this.userRepository.findByEmail(email);
-        const cpfExists = await this.userRepository.findByCpf(cpf);
+    private async validateFields(dto: UserCreateDTO | Partial<UserUpdateDTO>, isUpdate: boolean): Promise<void> {
+        if (dto.name && !Validators.validatePersonalName(dto.name)) {
+            throw new BadRequestError("Invalid name.");
+        }
+
+        if (!isUpdate && "cpf" in dto && dto.cpf && !Validators.validateCpf(dto.cpf)) {
+            throw new BadRequestError("Invalid CPF.");
+        }
+
+        if (dto.email && !Validators.validateEmailAddress(dto.email)) {
+            throw new BadRequestError("Invalid email.");
+        }
+
+        if (dto.password && !Validators.validatePassword(dto.password)) {
+            throw new BadRequestError(
+                "Invalid password. It must have at least 8 characters, including one uppercase letter, one lowercase letter, one number, and one special character."
+            );
+        }
+    }
+
+
+    private async validateUniqueFields(email: string, cpf?: string): Promise<void> {
+        const [emailExists, cpfExists] = await Promise.all([
+            this.userRepository.findByEmail(email),
+            cpf ? this.userRepository.findByCpf(cpf) : null,
+        ]);
 
         if (emailExists || cpfExists) {
             throw new BadRequestError("E-mail or CPF already in use.");
         }
     }
 
-    private async validateUniqueEmail(email: string): Promise<void> {
-        const emailExists = await this.userRepository.findByEmail(email);
-        if (emailExists) {
-            throw new BadRequestError("E-mail already in use.");
-        }
-    }
-
-    private async findUser(id: string): Promise<any> {
+    private async findUserById(id: string): Promise<any> {
         const user = await this.userRepository.findById(id);
         if (!user) {
             throw new NotFoundError("User not found.");
@@ -106,6 +104,15 @@ export default class UserService implements IUserService {
             xp: 0,
             level: 1,
         };
+    }
+
+    private buildUpdateData(dto: UserUpdateDTO): Partial<any> {
+        const updatedData: Partial<any> = {};
+        if (dto.name) updatedData.name = dto.name;
+        if (dto.email) updatedData.email = dto.email;
+        if (dto.password) updatedData.password = dto.password;
+        if (dto.avatar) updatedData.avatar = dto.avatar;
+        return updatedData;
     }
 
 }
