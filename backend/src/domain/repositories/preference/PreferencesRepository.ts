@@ -1,4 +1,4 @@
-import Prisma from "../orms/Prisma";
+import Prisma from "../../../infrastructure/orm/Prisma";
 
 export default class PreferencesRepository {
 

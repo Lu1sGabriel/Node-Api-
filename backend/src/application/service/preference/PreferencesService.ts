@@ -1,9 +1,11 @@
-import { PreferencesCreateDTO } from "../dtos/PreferenceDTO";
-import { BadRequestError, NotFoundError } from "../helpers/ApiErrors";
-import PreferencesRepository from "../repositories/PreferencesRepository";
-import UserService from "./UserService";
+import { PreferencesCreateDTO } from "../../../presentation/dto/preference/PreferenceDTO";
+import { BadRequestError, NotFoundError } from "../../../shared/utils/ApiErrors";
+import PreferencesRepository from "../../../domain/repositories/preference/PreferencesRepository";
+import UserService from "../user/UserService";
+import { IPreferenceService } from "./IPreferenceService";
 
-export default class PreferencesService {
+export default class PreferencesService implements IPreferenceService {
+
     private readonly preferencesRepository: PreferencesRepository;
     private readonly userService: UserService;
 
@@ -38,4 +40,4 @@ export default class PreferencesService {
         await this.preferencesRepository.delete(ids);
     }
 
-}
+} 

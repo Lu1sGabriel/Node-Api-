@@ -1,6 +1,6 @@
 import { Express, Request, Response, Router } from 'express';
-import PreferencesService from '../services/PreferencesService';
-import { PreferencesCreateDTO } from '../dtos/PreferenceDTO';
+import PreferencesService from '../../../application/service/preference/PreferencesService';
+import { PreferencesCreateDTO } from '../../dto/preference/PreferenceDTO';
 
 export default function PreferencesController(server: Express): void {
 

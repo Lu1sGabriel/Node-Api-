@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ApiError } from "../helpers/ApiErrors";
+import { ApiError } from "../../shared/utils/ApiErrors";
 
 
 export default function middlewareError(error: Error & Partial<ApiError>, request: Request, response: Response, next: NextFunction) {

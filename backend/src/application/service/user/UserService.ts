@@ -1,15 +1,8 @@
-import UserRepository from "../repositories/UserRepository";
-import { UserCreateDTO, UserUpdateDTO } from "../dtos/UserDTO";
-import { PasswordService } from "./PasswordService ";
-import { BadRequestError, NotFoundError } from "../helpers/ApiErrors";
-
-interface IUserService {
-    create(dto: UserCreateDTO): Promise<any>;
-    update(id: string, dto: UserUpdateDTO): Promise<any>;
-    findById(id: string): Promise<any>;
-    findByEmail(email: string): Promise<any>;
-    delete(id: string): Promise<void>;
-}
+import UserRepository from "../../../domain/repositories/user/UserRepository";
+import { UserCreateDTO, UserUpdateDTO } from "../../../presentation/dto/user/UserDTO";
+import { PasswordService } from "../password/PasswordService ";
+import { BadRequestError, NotFoundError } from "../../../shared/utils/ApiErrors";
+import IUserService from "./IUserService";
 
 export default class UserService implements IUserService {
     private readonly userRepository: UserRepository;

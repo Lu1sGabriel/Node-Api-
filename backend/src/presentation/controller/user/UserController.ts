@@ -1,6 +1,6 @@
 import { Express, Router, Request, Response } from "express";
-import UserService from "../services/UserService";
-import { UserCreateDTO, UserUpdateDTO } from "../dtos/UserDTO";
+import UserService from "../../../application/service/user/UserService";
+import { UserCreateDTO, UserUpdateDTO } from "../../dto/user/UserDTO";
 
 export default function UserController(server: Express): void {
 

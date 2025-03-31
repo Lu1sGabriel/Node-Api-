@@ -3,9 +3,9 @@ import "express-async-errors";
 import express from "express";
 import cors from "cors";
 
-import UserController from "./controllers/UserController";
-import PreferencesController from "./controllers/PreferencesController";
-import middlewareError from "./middlewares/Error";
+import UserController from "./presentation/controller/user/UserController";
+import PreferencesController from "./presentation/controller/preference/PreferenceController";
+import middlewareError from "./infrastructure/middleware/Error";
 
 const server = express();
 
