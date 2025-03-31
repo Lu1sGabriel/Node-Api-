@@ -1,21 +1,24 @@
 import UserRepository from "../repositories/UserRepository";
-import AppError from "../handlers/AppError";
 import { UserCreateDTO, UserUpdateDTO } from "../dtos/UserDTO";
 import { PasswordService } from "./PasswordService ";
+import { BadRequestError, NotFoundError } from "../helpers/ApiErrors";
 
 interface IUserService {
     create(dto: UserCreateDTO): Promise<any>;
     update(id: string, dto: UserUpdateDTO): Promise<any>;
     findById(id: string): Promise<any>;
     findByEmail(email: string): Promise<any>;
+    delete(id: string): Promise<void>;
 }
 
 export default class UserService implements IUserService {
-
     private readonly userRepository: UserRepository;
     private readonly passwordService: PasswordService;
 
-    public constructor(userRepository: UserRepository = new UserRepository(), passwordService: PasswordService = new PasswordService()) {
+    public constructor(
+        userRepository: UserRepository = new UserRepository(),
+        passwordService: PasswordService = new PasswordService()
+    ) {
         this.userRepository = userRepository;
         this.passwordService = passwordService;
     }
@@ -55,7 +58,7 @@ export default class UserService implements IUserService {
     public async findById(id: string): Promise<any> {
         const user = await this.userRepository.findById(id);
         if (!user) {
-            throw new AppError("User not found. ", 404);
+            throw new NotFoundError("User not found.");
         }
         return user;
     }
@@ -63,7 +66,7 @@ export default class UserService implements IUserService {
     public async findByEmail(email: string): Promise<any> {
         const user = await this.userRepository.findByEmail(email);
         if (!user) {
-            throw new AppError("User not found. ", 404);
+            throw new NotFoundError("User not found.");
         }
         return user;
     }
@@ -71,7 +74,7 @@ export default class UserService implements IUserService {
     public async delete(id: string): Promise<void> {
         const user = await this.userRepository.findById(id);
         if (!user) {
-            throw new AppError("User not found. ", 404);
+            throw new NotFoundError("User not found.");
         }
         await this.userRepository.delete(id);
     }
@@ -81,21 +84,21 @@ export default class UserService implements IUserService {
         const cpfExists = await this.userRepository.findByCpf(cpf);
 
         if (emailExists || cpfExists) {
-            throw new AppError("E-mail or CPF already in use. ", 400);
+            throw new BadRequestError("E-mail or CPF already in use.");
         }
     }
 
     private async validateUniqueEmail(email: string): Promise<void> {
         const emailExists = await this.userRepository.findByEmail(email);
         if (emailExists) {
-            throw new AppError("E-mail already in use. ", 400);
+            throw new BadRequestError("E-mail already in use.");
         }
     }
 
     private async findUser(id: string): Promise<any> {
         const user = await this.userRepository.findById(id);
         if (!user) {
-            throw new AppError("User not found. ", 404);
+            throw new NotFoundError("User not found.");
         }
         return user;
     }
@@ -111,5 +114,4 @@ export default class UserService implements IUserService {
             level: 1,
         };
     }
-
 }

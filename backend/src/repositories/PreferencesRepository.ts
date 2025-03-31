@@ -8,6 +8,9 @@ export default class PreferencesRepository {
             where: {
                 id: id,
             },
+            omit: {
+                userId: true,
+            },
         });
     }
 
@@ -16,12 +19,18 @@ export default class PreferencesRepository {
             where: {
                 userId: userId,
             },
+            omit: {
+                userId: true,
+            },
         });
     }
 
     public async create(data: PreferencesCreateDTO) {
         return await Prisma.preferences.create({
             data,
+            omit: {
+                userId: true,
+            },
         });
     }
 

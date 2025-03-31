@@ -1,20 +1,23 @@
 import "dotenv/config";
-import express, { json } from "express";
+import "express-async-errors";
+import express from "express";
 import cors from "cors";
 
 import UserController from "./controllers/UserController";
 import PreferencesController from "./controllers/PreferencesController";
+import middlewareError from "./middlewares/Error";
 
 const server = express();
 
 server.use(express.json());
-server.use(json());
 server.use(cors());
 
 UserController(server);
 PreferencesController(server);
 
-const port = process.env.PORT;
-server.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+server.use(middlewareError);
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
