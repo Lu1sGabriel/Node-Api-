@@ -1,4 +1,4 @@
-export class Create {
+export class UserCreateDTO {
     name: string;
     email: string;
     cpf: string;
@@ -15,7 +15,7 @@ export class Create {
 
 }
 
-export class Update {
+export class UserUpdateDTO {
     name?: string;
     email?: string;
     password?: string;

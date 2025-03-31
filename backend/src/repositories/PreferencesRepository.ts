@@ -1,5 +1,5 @@
 import Prisma from "../orms/Prisma";
-import { Create } from "../dtos/PreferenceDTO";
+import { PreferencesCreateDTO } from "../dtos/PreferenceDTO";
 
 export default class PreferencesRepository {
 
@@ -19,7 +19,7 @@ export default class PreferencesRepository {
         });
     }
 
-    public async create(data: Create) {
+    public async create(data: PreferencesCreateDTO) {
         return await Prisma.preferences.create({
             data,
         });

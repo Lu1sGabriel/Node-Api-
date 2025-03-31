@@ -1,4 +1,4 @@
-export class Create {
+export class PreferencesCreateDTO {
     userId: string;
     typeId: string;
 

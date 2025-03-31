@@ -1,5 +1,5 @@
 import Prisma from "../orms/Prisma";
-import { Create, Update } from "../dtos/UserDTO";
+import { UserCreateDTO, UserUpdateDTO } from "../dtos/UserDTO";
 
 export default class UserRepository {
 
@@ -21,13 +21,13 @@ export default class UserRepository {
         });
     }
 
-    public async create(data: Create) {
+    public async create(data: UserCreateDTO) {
         return await Prisma.users.create({
             data,
         });
     }
 
-    public async update(id: string, data: Update) {
+    public async update(id: string, data: UserUpdateDTO) {
         return await Prisma.users.update({
             where: { id },
             data,

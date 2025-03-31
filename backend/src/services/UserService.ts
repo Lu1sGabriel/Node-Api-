@@ -1,16 +1,16 @@
 import UserRepository from "../repositories/UserRepository";
 import AppError from "../handlers/AppError";
-import { Create, Update } from "../dtos/UserDTO";
+import { UserCreateDTO, UserUpdateDTO } from "../dtos/UserDTO";
 import { PasswordService } from "./PasswordService ";
 
 interface IUserService {
-    create(dto: Create): Promise<any>;
-    update(id: string, dto: Update): Promise<any>;
+    create(dto: UserCreateDTO): Promise<any>;
+    update(id: string, dto: UserUpdateDTO): Promise<any>;
     findById(id: string): Promise<any>;
     findByEmail(email: string): Promise<any>;
 }
 
-export class UserService implements IUserService {
+export default class UserService implements IUserService {
 
     private readonly userRepository: UserRepository;
     private readonly passwordService: PasswordService;
@@ -20,7 +20,7 @@ export class UserService implements IUserService {
         this.passwordService = passwordService;
     }
 
-    public async create(dto: Create): Promise<any> {
+    public async create(dto: UserCreateDTO): Promise<any> {
         await this.validateUniqueFields(dto.email, dto.cpf);
 
         const hashedPassword = await this.passwordService.hashPassword(dto.password);
@@ -29,7 +29,7 @@ export class UserService implements IUserService {
         return this.userRepository.create(userData);
     }
 
-    public async update(id: string, dto: Update): Promise<any> {
+    public async update(id: string, dto: UserUpdateDTO): Promise<any> {
         const user = await this.findUser(id);
 
         if (dto.email) {
@@ -100,7 +100,7 @@ export class UserService implements IUserService {
         return user;
     }
 
-    private buildUserData(dto: Create, hashedPassword: string): any {
+    private buildUserData(dto: UserCreateDTO, hashedPassword: string): any {
         return {
             name: dto.name,
             email: dto.email,

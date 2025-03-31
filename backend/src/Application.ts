@@ -2,14 +2,17 @@ import "dotenv/config";
 import express, { json } from "express";
 import cors from "cors";
 
-import userController from "./controllers/UserController";
+import UserController from "./controllers/UserController";
+import PreferencesController from "./controllers/PreferencesController";
 
 const server = express();
 
+server.use(express.json());
 server.use(json());
 server.use(cors());
 
-userController(server);
+UserController(server);
+PreferencesController(server);
 
 const port = process.env.PORT;
 server.listen(port, () => {
