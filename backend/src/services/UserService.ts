@@ -114,4 +114,5 @@ export default class UserService implements IUserService {
             level: 1,
         };
     }
+
 }

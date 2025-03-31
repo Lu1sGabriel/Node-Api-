@@ -1,43 +1,91 @@
 import Prisma from "../orms/Prisma";
-import { PreferencesCreateDTO } from "../dtos/PreferenceDTO";
 
 export default class PreferencesRepository {
 
-    public findById(id: string): Promise<any> {
-        return Prisma.preferences.findUnique({
+    public async findById(id: string): Promise<{
+        typeId: string;
+        typeName: string;
+        typeDescription: string;
+    } | null> {
+        const preference = await Prisma.preferences.findUnique({
             where: {
-                id: id,
+                id,
             },
-            omit: {
-                userId: true,
+            include: {
+                type: true,
             },
         });
+
+        if (!preference) return null;
+
+        return {
+            typeId: preference.type.id,
+            typeName: preference.type.name,
+            typeDescription: preference.type.description,
+        };
     }
 
-    public async findByUser(userId: string): Promise<any> {
-        return await Prisma.preferences.findMany({
+    public async findByUser(userId: string): Promise<{
+        typeId: string;
+        typeName: string;
+        typeDescription: string;
+    }[]> {
+        const preferences = await Prisma.preferences.findMany({
             where: {
-                userId: userId,
+                userId,
             },
-            omit: {
-                userId: true,
+            include: {
+                type: true,
+            },
+            orderBy: {
+                type: {
+                    name: "asc",
+                },
             },
         });
+
+        return preferences.map(preference => ({
+            typeId: preference.type.id,
+            typeName: preference.type.name,
+            typeDescription: preference.type.description,
+        }));
     }
 
-    public async create(data: PreferencesCreateDTO) {
-        return await Prisma.preferences.create({
-            data,
-            omit: {
-                userId: true,
-            },
-        });
+    public async create(userId: string, typeIds: string[]): Promise<{
+        id: string;
+        userId: string;
+        typeId: string;
+    }[]> {
+        const createdPreferences = [];
+
+        for (const typeId of typeIds) {
+            const existingPreference = await Prisma.preferences.findFirst({
+                where: {
+                    userId,
+                    typeId,
+                },
+            });
+
+            if (!existingPreference) {
+                const newPreference = await Prisma.preferences.create({
+                    data: {
+                        userId,
+                        typeId,
+                    },
+                });
+                createdPreferences.push(newPreference);
+            }
+        }
+
+        return createdPreferences;
     }
 
-    public async delete(id: string) {
-        return await Prisma.preferences.deleteMany({
+    public async delete(ids: string[]): Promise<void> {
+        await Prisma.preferences.deleteMany({
             where: {
-                id: id,
+                id: {
+                    in: ids,
+                },
             },
         });
     }

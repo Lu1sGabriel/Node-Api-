@@ -8,25 +8,24 @@ export default function PreferencesController(server: Express): void {
     const preferencesService = new PreferencesService();
     server.use('/user/preferences', router);
 
-    router.get("/:userId", async (req: Request, res: Response) => {
-        const { userId } = req.params;
+    router.get("/:userId", async (request: Request, response: Response) => {
+        const { userId } = request.params;
         const preferences = await preferencesService.findByUser(userId);
-        res.status(200).json({ status: "success", data: preferences });
+        response.status(200).json(preferences);
     });
 
-    router.post("/define", async (req: Request, res: Response) => {
-        const { userId, typeId } = req.body;
+    router.post("/define", async (request: Request, response: Response) => {
+        const { userId, typeId } = request.body;
         const dto = new PreferencesCreateDTO(userId, typeId);
         const preferences = await preferencesService.create(dto);
-        res.status(201).json({ status: "success", data: preferences });
+        response.status(201).json(preferences);
     });
 
-    router.delete("/", async (req: Request, res: Response) => {
-        const { preferenceIds } = req.body;
+    router.delete("/delete", async (request: Request, response: Response) => {
+        const { preferenceIds } = request.body;
 
         await preferencesService.delete(preferenceIds);
-        res.status(204).json({ status: "success", message: "Preferences deleted successfully" });
+        response.status(204).end();
     });
-
 
 }

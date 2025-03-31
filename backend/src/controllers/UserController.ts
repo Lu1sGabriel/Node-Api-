@@ -13,14 +13,14 @@ export default function UserController(server: Express): void {
         const { id } = req.params;
         const user = await userService.findById(id);
 
-        res.status(200).json({ status: "success", data: user });
+        res.status(200).json(user);
     });
 
     router.get("/email/:email", async (req: Request, res: Response) => {
         const { email } = req.params;
         const user = await userService.findByEmail(email);
 
-        res.status(200).json({ status: "success", data: user });
+        res.status(200).json(user);
     });
 
     router.post("/register", async (req: Request, res: Response) => {
@@ -28,7 +28,7 @@ export default function UserController(server: Express): void {
         const dto = new UserCreateDTO(name, email, cpf, password, avatar);
 
         const user = await userService.create(dto);
-        res.status(201).json({ status: "success", data: user });
+        res.status(201).json(user);
     });
 
     router.put("/:id", async (req: Request, res: Response) => {
@@ -37,14 +37,14 @@ export default function UserController(server: Express): void {
         const dto = new UserUpdateDTO(name, email, password, avatar);
 
         const updatedUser = await userService.update(id, dto);
-        res.status(200).json({ status: "success", data: updatedUser });
+        res.status(200).json(updatedUser);
     });
 
     router.delete("/:id", async (req: Request, res: Response) => {
         const { id } = req.params;
         await userService.delete(id);
 
-        res.status(204).json({ status: "success", message: "User deleted successfully" });
+        res.status(204);
     });
 
 }

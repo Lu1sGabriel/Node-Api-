@@ -83,7 +83,7 @@ model Users {
 
 model Preferences {
   id     String @id @default(uuid())
-  userId String @unique
+  userId String
   typeId String
 
   user Users         @relation(fields: [userId], references: [id])
