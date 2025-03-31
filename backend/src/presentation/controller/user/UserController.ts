@@ -16,13 +16,6 @@ export default function UserController(server: Express): void {
         res.status(200).json(user);
     });
 
-    router.get("/email/:email", async (req: Request, res: Response) => {
-        const { email } = req.params;
-        const user = await userService.findByEmail(email);
-
-        res.status(200).json(user);
-    });
-
     router.post("/register", async (req: Request, res: Response) => {
         const { name, email, cpf, password, avatar } = req.body;
         const dto = new UserCreateDTO(name, email, cpf, password, avatar);

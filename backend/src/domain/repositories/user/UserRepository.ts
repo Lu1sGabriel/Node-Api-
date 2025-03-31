@@ -10,9 +10,9 @@ export default class UserRepository {
         avatar?: string;
         xp?: number;
         level?: number;
-        preferences: {
+        achievements: {
             name: string;
-            description: string;
+            criterion: string;
         }[];
     } | null> {
         const user = await Prisma.users.findUnique({
@@ -21,9 +21,9 @@ export default class UserRepository {
                 deletedAt: null,
             },
             include: {
-                preferences: {
+                userAchievements: {
                     include: {
-                        type: true,
+                        achievement: true,
                     },
                 },
             },
@@ -39,30 +39,36 @@ export default class UserRepository {
             avatar: user.avatar,
             xp: user.xp,
             level: user.level,
-            preferences: user.preferences.map(preference => ({
-                name: preference.type.name,
-                description: preference.type.description,
+            achievements: user.userAchievements.map(userAchievement => ({
+                name: userAchievement.achievement.name,
+                criterion: userAchievement.achievement.criterion,
             })),
         };
     }
 
-    public async findByEmail(email: string): Promise<{
-        id: string;
-        name: string;
-        email: string;
-        cpf: string;
-        avatar?: string;
-        xp?: number;
-        level?: number;
-        preferences?: { name: string; description: string }[];
-    } | null> {
-        return Prisma.users.findUnique({
+
+    public async findByEmail(email: string): Promise<boolean> {
+        const user = await Prisma.users.findUnique({
             where: {
                 email,
                 deletedAt: null,
             },
         });
+
+        return !!user;
     }
+
+    public async findByCpf(cpf: string): Promise<boolean> {
+        const user = await Prisma.users.findUnique({
+            where: {
+                cpf,
+                deletedAt: null,
+            },
+        });
+
+        return !!user;
+    }
+
 
     public async create(data: {
         name: string;
@@ -88,8 +94,8 @@ export default class UserRepository {
             email?: string;
             password?: string;
             avatar?: string;
-            xp?: number; // Adicionado para atualizar o XP
-            level?: number; // Adicionado para atualizar o nível
+            xp?: number;
+            level?: number;
         }
     ): Promise<{
         id: string;
@@ -98,26 +104,12 @@ export default class UserRepository {
         cpf: string;
         password: string;
         avatar?: string;
-        xp?: number; // Retornando o XP atualizado
-        level?: number; // Retornando o nível atualizado
+        xp?: number;
+        level?: number;
     }> {
         return Prisma.users.update({
             where: { id },
             data,
-        });
-    }
-
-    public async findByCpf(cpf: string): Promise<{
-        id: string;
-        name: string;
-        email: string;
-        cpf: string;
-        avatar?: string;
-        xp?: number;
-        level?: number;
-    } | null> {
-        return Prisma.users.findUnique({
-            where: { cpf },
         });
     }
 

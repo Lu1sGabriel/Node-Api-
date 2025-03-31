@@ -43,12 +43,6 @@ export default class UserService implements IUserService {
         return this.findUserById(id);
     }
 
-    public async findByEmail(email: string): Promise<any> {
-        const user = await this.userRepository.findByEmail(email);
-        if (!user) throw new NotFoundError("User not found.");
-        return user;
-    }
-
     public async delete(id: string): Promise<void> {
         await this.findUserById(id);
         await this.userRepository.delete(id);
@@ -74,11 +68,10 @@ export default class UserService implements IUserService {
         }
     }
 
-
     private async validateUniqueFields(email: string, cpf?: string): Promise<void> {
         const [emailExists, cpfExists] = await Promise.all([
             this.userRepository.findByEmail(email),
-            cpf ? this.userRepository.findByCpf(cpf) : null,
+            cpf ? this.userRepository.findByCpf(cpf) : false,
         ]);
 
         if (emailExists || cpfExists) {
