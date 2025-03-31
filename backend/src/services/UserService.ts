@@ -55,7 +55,7 @@ export class UserService implements IUserService {
     public async findById(id: string): Promise<any> {
         const user = await this.userRepository.findById(id);
         if (!user) {
-            throw new AppError("Usuário não encontrado", 404);
+            throw new AppError("User not found. ", 404);
         }
         return user;
     }
@@ -63,7 +63,7 @@ export class UserService implements IUserService {
     public async findByEmail(email: string): Promise<any> {
         const user = await this.userRepository.findByEmail(email);
         if (!user) {
-            throw new AppError("Usuário não encontrado", 404);
+            throw new AppError("User not found. ", 404);
         }
         return user;
     }
@@ -71,7 +71,7 @@ export class UserService implements IUserService {
     public async delete(id: string): Promise<void> {
         const user = await this.userRepository.findById(id);
         if (!user) {
-            throw new AppError("Usuário não encontrado", 404);
+            throw new AppError("User not found. ", 404);
         }
         await this.userRepository.delete(id);
     }
@@ -81,21 +81,21 @@ export class UserService implements IUserService {
         const cpfExists = await this.userRepository.findByCpf(cpf);
 
         if (emailExists || cpfExists) {
-            throw new AppError("E-mail ou CPF já está em uso", 400);
+            throw new AppError("E-mail or CPF already in use. ", 400);
         }
     }
 
     private async validateUniqueEmail(email: string): Promise<void> {
         const emailExists = await this.userRepository.findByEmail(email);
         if (emailExists) {
-            throw new AppError("E-mail já está em uso", 400);
+            throw new AppError("E-mail already in use. ", 400);
         }
     }
 
     private async findUser(id: string): Promise<any> {
         const user = await this.userRepository.findById(id);
         if (!user) {
-            throw new AppError("Usuário não encontrado", 404);
+            throw new AppError("User not found. ", 404);
         }
         return user;
     }

@@ -11,7 +11,7 @@ export default class PreferencesService {
     public async findByUser(userId: string): Promise<any> {
         const preferences = await this.preferencesRepository.findByUser(userId);
         if (!preferences) {
-            throw new AppError("Preferências não encontradas", 404);
+            throw new AppError("Preferences not found", 404);
         }
         return preferences;
     }
