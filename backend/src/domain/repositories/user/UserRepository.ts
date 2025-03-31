@@ -88,6 +88,8 @@ export default class UserRepository {
             email?: string;
             password?: string;
             avatar?: string;
+            xp?: number; // Adicionado para atualizar o XP
+            level?: number; // Adicionado para atualizar o nível
         }
     ): Promise<{
         id: string;
@@ -96,6 +98,8 @@ export default class UserRepository {
         cpf: string;
         password: string;
         avatar?: string;
+        xp?: number; // Retornando o XP atualizado
+        level?: number; // Retornando o nível atualizado
     }> {
         return Prisma.users.update({
             where: { id },

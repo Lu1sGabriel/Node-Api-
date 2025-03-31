@@ -1,68 +1,68 @@
 import Prisma from "../../../infrastructure/orm/Prisma";
 
-export default class AchievementsRepository {
+export default class UserAchievementsRepository {
 
-    public async findAll(): Promise<{
-        id: string;
-        name: string;
-        criterion: string;
+    public async findByUser(userId: string): Promise<{
+        achievementId: string;
+        achievementName: string;
+        achievementCriterion: string;
     }[]> {
-        const achievements = await Prisma.achievements.findMany({
+        const userAchievements = await Prisma.userAchievements.findMany({
+            where: {
+                userId,
+            },
+            include: {
+                achievement: true,
+            },
             orderBy: {
-                name: "asc",
+                achievement: {
+                    name: "asc",
+                },
             },
         });
 
-        return achievements.map(achievement => ({
-            id: achievement.id,
-            name: achievement.name,
-            criterion: achievement.criterion,
+        return userAchievements.map(userAchievement => ({
+            achievementId: userAchievement.achievement.id,
+            achievementName: userAchievement.achievement.name,
+            achievementCriterion: userAchievement.achievement.criterion,
         }));
     }
 
-    public async findById(id: string): Promise<{
+    public async create(userId: string, achievementIds: string[]): Promise<{
         id: string;
-        name: string;
-        criterion: string;
-    } | null> {
-        const achievement = await Prisma.achievements.findUnique({
-            where: {
-                id,
-            },
-        });
+        userId: string;
+        achievementId: string;
+    }[]> {
+        const createdAchievements = [];
 
-        if (!achievement) return null;
+        for (const achievementId of achievementIds) {
+            const existingUserAchievement = await Prisma.userAchievements.findFirst({
+                where: {
+                    userId,
+                    achievementId,
+                },
+            });
 
-        return {
-            id: achievement.id,
-            name: achievement.name,
-            criterion: achievement.criterion,
-        };
+            if (!existingUserAchievement) {
+                const newUserAchievement = await Prisma.userAchievements.create({
+                    data: {
+                        userId,
+                        achievementId,
+                    },
+                });
+                createdAchievements.push(newUserAchievement);
+            }
+        }
+
+        return createdAchievements;
     }
 
-    public async create(data: {
-        name: string;
-        criterion: string;
-    }): Promise<{
-        id: string;
-        name: string;
-        criterion: string;
-    }> {
-        const newAchievement = await Prisma.achievements.create({
-            data,
-        });
-
-        return {
-            id: newAchievement.id,
-            name: newAchievement.name,
-            criterion: newAchievement.criterion,
-        };
-    }
-
-    public async delete(id: string): Promise<void> {
-        await Prisma.achievements.delete({
+    public async delete(ids: string[]): Promise<void> {
+        await Prisma.userAchievements.deleteMany({
             where: {
-                id,
+                id: {
+                    in: ids,
+                },
             },
         });
     }
