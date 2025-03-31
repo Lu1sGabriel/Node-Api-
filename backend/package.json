@@ -1,20 +1,16 @@
 {
-  "name": "luis-gabriel-g-es-de-santana",
+  "name": "backend",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/Application.ts",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bc-fullstack-06/Luis-Gabriel-G-es-de-Santana.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "description": "",
   "bugs": {
     "url": "https://github.com/bc-fullstack-06/Luis-Gabriel-G-es-de-Santana/issues"
   },

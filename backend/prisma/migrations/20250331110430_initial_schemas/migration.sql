@@ -3,7 +3,6 @@ CREATE TABLE "user_achievements" (
     "id" TEXT NOT NULL,
     "achievementId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "user_achievements_pkey" PRIMARY KEY ("id")
 );
@@ -13,7 +12,6 @@ CREATE TABLE "achievements" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "criterion" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "achievements_pkey" PRIMARY KEY ("id")
 );
@@ -24,7 +22,6 @@ CREATE TABLE "activity_addresses" (
     "activityId" TEXT NOT NULL,
     "latitude" DOUBLE PRECISION NOT NULL,
     "longitude" DOUBLE PRECISION NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "activity_addresses_pkey" PRIMARY KEY ("id")
 );
@@ -58,7 +55,6 @@ CREATE TABLE "users" (
     "xp" INTEGER NOT NULL DEFAULT 0,
     "level" INTEGER NOT NULL DEFAULT 1,
     "deletedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -68,7 +64,6 @@ CREATE TABLE "preferences" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "typeId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "preferences_pkey" PRIMARY KEY ("id")
 );
@@ -80,7 +75,6 @@ CREATE TABLE "activity_participants" (
     "userId" TEXT NOT NULL,
     "approved" BOOLEAN NOT NULL,
     "confirmedAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "activity_participants_pkey" PRIMARY KEY ("id")
 );
@@ -91,7 +85,6 @@ CREATE TABLE "activity_types" (
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "image" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "activity_types_pkey" PRIMARY KEY ("id")
 );

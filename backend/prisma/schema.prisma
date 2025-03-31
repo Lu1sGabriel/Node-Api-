@@ -8,10 +8,9 @@ datasource db {
 }
 
 model UserAchievements {
-  id            String   @id @default(uuid())
+  id            String @id @default(uuid())
   achievementId String
   userId        String
-  createdAt     DateTime @default(now())
 
   user        Users        @relation(fields: [userId], references: [id])
   achievement Achievements @relation(fields: [achievementId], references: [id])
@@ -20,10 +19,9 @@ model UserAchievements {
 }
 
 model Achievements {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
   name      String
   criterion String
-  createdAt DateTime @default(now())
 
   userAchievements UserAchievements[]
 
@@ -31,11 +29,10 @@ model Achievements {
 }
 
 model ActivityAddresses {
-  id         String   @id @default(uuid())
-  activityId String   @unique
+  id         String @id @default(uuid())
+  activityId String @unique
   latitude   Float
   longitude  Float
-  createdAt  DateTime @default(now())
 
   activity Activities @relation(fields: [activityId], references: [id], onDelete: Cascade)
 
@@ -75,7 +72,6 @@ model Users {
   xp        Int       @default(0)
   level     Int       @default(1)
   deletedAt DateTime?
-  createdAt DateTime  @default(now())
 
   preferences          Preferences[]
   userAchievements     UserAchievements[]
@@ -86,10 +82,9 @@ model Users {
 }
 
 model Preferences {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  typeId    String
-  createdAt DateTime @default(now())
+  id     String @id @default(uuid())
+  userId String @unique
+  typeId String
 
   user Users @relation(fields: [userId], references: [id])
 
@@ -102,7 +97,6 @@ model ActivityParticipants {
   userId      String
   approved    Boolean
   confirmedAt DateTime?
-  createdAt   DateTime  @default(now())
 
   activity Activities @relation(fields: [activityId], references: [id])
   user     Users      @relation(fields: [userId], references: [id])
@@ -112,11 +106,10 @@ model ActivityParticipants {
 }
 
 model ActivityTypes {
-  id          String   @id @default(uuid())
+  id          String @id @default(uuid())
   name        String
   description String
   image       String
-  createdAt   DateTime @default(now())
 
   activities Activities[]
 
