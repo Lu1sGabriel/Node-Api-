@@ -1,7 +1,7 @@
 import UserRepository from "../../../domain/repositories/user/UserRepository";
 import { UserCreateDTO, UserUpdateDTO } from "../../../presentation/dto/user/UserDTO";
 import { PasswordService } from "../password/PasswordService ";
-import { BadRequestError, NotFoundError } from "../../../shared/utils/ApiErrors";
+import { BadRequestError, NotFoundError } from "../../../shared/utils/ApiError";
 import IUserService from "./IUserService";
 import Validators from "../../../shared/utils/Validators";
 

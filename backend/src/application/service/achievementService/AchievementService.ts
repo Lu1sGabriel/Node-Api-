@@ -1,5 +1,5 @@
 import AchievementsRepository from "../../../domain/repositories/achivement/AchievementRepository";
-import { BadRequestError } from "../../../shared/utils/ApiErrors";
+import { BadRequestError } from "../../../shared/utils/ApiError";
 
 export default class AchievementsService {
 

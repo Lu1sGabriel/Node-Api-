@@ -1,7 +1,7 @@
 import UserAchievementsRepository from "../../../domain/repositories/userAchievementsRepository/UserAchievementsRepository";
 import AchievementsRepository from "../../../domain/repositories/achivement/AchievementRepository";
 import UserRepository from "../../../domain/repositories/user/UserRepository";
-import { NotFoundError } from "../../../shared/utils/ApiErrors";
+import { NotFoundError } from "../../../shared/utils/ApiError";
 
 export default class UserAchievementsService {
 

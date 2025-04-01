@@ -1,5 +1,5 @@
 import { PreferencesCreateDTO } from "../../../presentation/dto/preference/PreferenceDTO";
-import { BadRequestError, NotFoundError } from "../../../shared/utils/ApiErrors";
+import { BadRequestError, NotFoundError } from "../../../shared/utils/ApiError";
 import PreferencesRepository from "../../../domain/repositories/preference/PreferencesRepository";
 import UserService from "../user/UserService";
 import { IPreferenceService } from "./IPreferenceService";
