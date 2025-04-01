@@ -10,6 +10,9 @@ export default class UserAchievementsRepository {
         const userAchievements = await Prisma.userAchievements.findMany({
             where: {
                 userId,
+                user: {
+                    deletedAt: null,
+                }
             },
             include: {
                 achievement: true,

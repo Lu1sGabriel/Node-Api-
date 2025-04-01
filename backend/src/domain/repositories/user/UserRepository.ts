@@ -10,6 +10,7 @@ export default class UserRepository {
         avatar?: string;
         xp?: number;
         level?: number;
+        deletedAt: Date | null;
         achievements: {
             name: string;
             criterion: string;
@@ -39,13 +40,13 @@ export default class UserRepository {
             avatar: user.avatar,
             xp: user.xp,
             level: user.level,
+            deletedAt: user.deletedAt,
             achievements: user.userAchievements.map(userAchievement => ({
                 name: userAchievement.achievement.name,
                 criterion: userAchievement.achievement.criterion,
             })),
         };
     }
-
 
     public async findByEmail(email: string): Promise<boolean> {
         const user = await Prisma.users.findUnique({
