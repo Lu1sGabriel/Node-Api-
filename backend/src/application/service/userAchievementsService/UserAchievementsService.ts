@@ -4,64 +4,58 @@ import UserRepository from "../../../domain/repositories/user/UserRepository";
 import { NotFoundError } from "../../../shared/utils/ApiError";
 
 export default class UserAchievementsService {
-
-    private readonly userAchievementsRepository: UserAchievementsRepository;
-    private readonly achievementsRepository: AchievementsRepository;
-    private readonly userRepository: UserRepository;
-
     private readonly xpPerAction = 100;
     private readonly xpToLevelUp = 1000;
 
     public constructor(
-        userAchievementsRepository: UserAchievementsRepository = new UserAchievementsRepository(),
-        achievementsRepository: AchievementsRepository = new AchievementsRepository(),
-        userRepository: UserRepository = new UserRepository()
-    ) {
-        this.userAchievementsRepository = userAchievementsRepository;
-        this.achievementsRepository = achievementsRepository;
-        this.userRepository = userRepository;
-    }
+        private readonly userAchievementsRepository = new UserAchievementsRepository(),
+        private readonly achievementsRepository = new AchievementsRepository(),
+        private readonly userRepository = new UserRepository()
+    ) { }
 
     public async confirmActivityParticipation(userId: string, creatorId: string): Promise<void> {
-        await this.incrementUserXp(userId);
-
-        await this.incrementUserXp(creatorId);
-
-        await this.checkAndAssignAchievement(userId, "first-check-in");
-        await this.checkAndAssignAchievement(creatorId, "activity-created");
+        if (userId != null && creatorId != null) {
+            await Promise.all([
+                this.incrementUserXp(userId),
+                this.incrementUserXp(creatorId),
+                this.assignAchievementIfNotExists(userId, "first-check-in"),
+                this.assignAchievementIfNotExists(creatorId, "activity-created")
+            ]);
+        }
     }
 
     private async incrementUserXp(userId: string): Promise<void> {
         const user = await this.userRepository.findById(userId);
-        if (!user) throw new NotFoundError("User not found.");
-
-        let xp = user.xp || 0;
-        let level = user.level || 1;
-
-        xp += this.xpPerAction;
-
-        if (xp >= this.xpToLevelUp) {
-            level += 1;
-            xp -= this.xpToLevelUp;
-
-            await this.checkAndAssignAchievement(userId, "level-up");
+        if (user == null) {
+            throw new NotFoundError("User not found.");
         }
 
-        await this.userRepository.update(userId, { xp, level });
+        if (user.xp == null) {
+            user.xp = 0;
+        }
+        user.xp += this.xpPerAction;
+
+        if (user.xp >= this.xpToLevelUp) {
+            if (user.level == null) {
+                user.level = 1;
+            }
+            user.level += 1;
+            user.xp -= this.xpToLevelUp;
+
+            await this.assignAchievementIfNotExists(userId, "level-up");
+        }
+
+        await this.userRepository.update(userId, { xp: user.xp, level: user.level });
     }
 
-    private async checkAndAssignAchievement(userId: string, criterion: string): Promise<void> {
+    private async assignAchievementIfNotExists(userId: string, criterion: string): Promise<void> {
         const existingAchievements = await this.userAchievementsRepository.findByUser(userId);
-        const hasAchievement = existingAchievements.some(
-            (achievement) => achievement.achievementCriterion === criterion
-        );
+        const hasAchievement = existingAchievements.some(a => a.achievementCriterion === criterion);
 
         if (!hasAchievement) {
-            const achievement = await this.achievementsRepository.findAll();
-            const matchingAchievement = achievement.find((a) => a.criterion === criterion);
-
-            if (matchingAchievement) {
-                await this.userAchievementsRepository.create(userId, [matchingAchievement.id]);
+            const achievement = await this.achievementsRepository.findByCriterion(criterion);
+            if (achievement != null) {
+                await this.userAchievementsRepository.create(userId, [achievement.id]);
             }
         }
     }

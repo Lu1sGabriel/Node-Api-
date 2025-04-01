@@ -40,6 +40,28 @@ export default class AchievementsRepository {
         };
     }
 
+    public async findByCriterion(criterion: string): Promise<{
+        id: string;
+        name: string;
+        criterion: string;
+    } | null> {
+        const achievement = await Prisma.achievements.findFirst({
+            where: {
+                criterion: criterion,
+            },
+        });
+
+        if (achievement == null) {
+            return null;
+        }
+
+        return {
+            id: achievement.id,
+            name: achievement.name,
+            criterion: achievement.criterion,
+        };
+    }
+
     public async create(data: {
         name: string;
         criterion: string;
