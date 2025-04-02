@@ -1,6 +1,6 @@
 import Prisma from "../../../infrastructure/orm/Prisma";
 
-export default class AchievementsRepository {
+export default class AchievementRepository {
 
     public async findAll(): Promise<{
         id: string;

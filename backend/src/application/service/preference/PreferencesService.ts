@@ -1,15 +1,15 @@
 import { PreferencesCreateDTO } from "../../../presentation/dto/preference/PreferenceDTO";
 import { BadRequestError, NotFoundError } from "../../../shared/utils/ApiError";
-import PreferencesRepository from "../../../domain/repositories/preference/PreferencesRepository";
+import PreferenceRepository from "../../../domain/repositories/preference/PreferenceRepository";
 import UserService from "../user/UserService";
 import { IPreferenceService } from "./IPreferenceService";
 
 export default class PreferencesService implements IPreferenceService {
 
-    private readonly preferencesRepository: PreferencesRepository;
+    private readonly preferencesRepository: PreferenceRepository;
     private readonly userService: UserService;
 
-    public constructor(preferencesRepository: PreferencesRepository = new PreferencesRepository(), userService: UserService = new UserService()) {
+    public constructor(preferencesRepository: PreferenceRepository = new PreferenceRepository(), userService: UserService = new UserService()) {
         this.preferencesRepository = preferencesRepository;
         this.userService = userService;
     }

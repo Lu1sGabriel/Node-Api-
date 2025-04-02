@@ -1,6 +1,6 @@
 import Prisma from "../../../infrastructure/orm/Prisma";
 
-export default class UserAchievementsRepository {
+export default class UserAchievementRepository {
 
     public async findByUser(userId: string): Promise<{
         achievementId: string;

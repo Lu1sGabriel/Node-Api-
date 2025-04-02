@@ -1,10 +1,11 @@
-import UserAchievementsRepository from "../../../domain/repositories/userAchievementsRepository/UserAchievementsRepository";
-import AchievementsRepository from "../../../domain/repositories/achivement/AchievementRepository";
+import UserAchievementRepository from "../../../domain/repositories/userAchievementRepository/UserAchievementRepository";
+import AchievementRepository from "../../../domain/repositories/achivement/AchievementRepository";
 import UserRepository from "../../../domain/repositories/user/UserRepository";
 import { NotFoundError } from "../../../shared/utils/ApiError";
 import { AchievementEnum } from "../../../domain/repositories/achivement/AchievementEnum";
+import { IUserAchievementService } from "./IUserAchievementService";
 
-export default class UserAchievementsService {
+export default class UserAchievementService implements IUserAchievementService {
 
     private readonly xpPerAction = 100;
     private readonly xpToLevelUp = 1000;
@@ -12,8 +13,8 @@ export default class UserAchievementsService {
     private readonly firstCreationBonus = 50;
 
     public constructor(
-        private readonly userAchievementsRepository = new UserAchievementsRepository(),
-        private readonly achievementsRepository = new AchievementsRepository(),
+        private readonly userAchievementsRepository = new UserAchievementRepository(),
+        private readonly achievementsRepository = new AchievementRepository(),
         private readonly userRepository = new UserRepository()
     ) { }
 
@@ -42,7 +43,7 @@ export default class UserAchievementsService {
         }
         user.xp += this.xpPerAction;
 
-        if (await this.hasAchievement(userId, AchievementEnum.FIRST_ACTIVITY_JOIN) === false) {
+        if (!(await this.hasAchievement(userId, AchievementEnum.FIRST_ACTIVITY_JOIN))) {
             user.xp += this.firstParticipationBonus;
             await this.assignAchievementIfNotExists(userId, AchievementEnum.FIRST_ACTIVITY_JOIN);
         }
@@ -52,7 +53,7 @@ export default class UserAchievementsService {
         }
         creator.xp += this.xpPerAction;
 
-        if (await this.hasAchievement(creatorId, AchievementEnum.FIRST_ACTIVITY_CREATED) === false) {
+        if (!(await this.hasAchievement(creatorId, AchievementEnum.FIRST_ACTIVITY_CREATED))) {
             creator.xp += this.firstCreationBonus;
             await this.assignAchievementIfNotExists(creatorId, AchievementEnum.FIRST_ACTIVITY_CREATED);
         }
@@ -63,7 +64,7 @@ export default class UserAchievementsService {
         ]);
     }
 
-    private async incrementUserXp(userId: string, newXp: number): Promise<void> {
+    public async incrementUserXp(userId: string, newXp: number): Promise<void> { // Agora é público
         const user = await this.userRepository.findById(userId);
         if (user == null) {
             throw new NotFoundError("User not found.");
@@ -89,13 +90,13 @@ export default class UserAchievementsService {
         await this.userRepository.update(userId, { xp: user.xp, level: user.level });
     }
 
-    private async hasAchievement(userId: string, criterion: AchievementEnum): Promise<boolean> {
+    public async hasAchievement(userId: string, criterion: AchievementEnum): Promise<boolean> {
         const existingAchievement = await this.userAchievementsRepository.findByUserAndCriterion(userId, criterion);
         return existingAchievement != null;
     }
 
-    private async assignAchievementIfNotExists(userId: string, criterion: AchievementEnum): Promise<void> {
-        if (await this.hasAchievement(userId, criterion) === false) {
+    public async assignAchievementIfNotExists(userId: string, criterion: AchievementEnum): Promise<void> {
+        if (!(await this.hasAchievement(userId, criterion))) {
             const achievement = await this.achievementsRepository.findByCriterion(criterion);
             if (achievement != null) {
                 await this.userAchievementsRepository.create(userId, [achievement.id]);

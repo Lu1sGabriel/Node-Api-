@@ -1,6 +1,6 @@
 import Prisma from "../../../infrastructure/orm/Prisma";
 
-export default class PreferencesRepository {
+export default class PreferenceRepository {
 
     public async findById(id: string): Promise<{
         typeId: string;

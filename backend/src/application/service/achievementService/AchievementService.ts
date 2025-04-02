@@ -1,12 +1,12 @@
-import AchievementsRepository from "../../../domain/repositories/achivement/AchievementRepository";
+import AchievementRepository from "../../../domain/repositories/achivement/AchievementRepository";
 import { BadRequestError } from "../../../shared/utils/ApiError";
 
 export default class AchievementsService {
 
-    private readonly achievementsRepository: AchievementsRepository;
+    private readonly achievementsRepository: AchievementRepository;
 
     public constructor(
-        achievementsRepository: AchievementsRepository = new AchievementsRepository()
+        achievementsRepository: AchievementRepository = new AchievementRepository()
     ) {
         this.achievementsRepository = achievementsRepository;
     }
