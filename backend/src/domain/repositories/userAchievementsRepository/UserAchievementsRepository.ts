@@ -31,6 +31,37 @@ export default class UserAchievementsRepository {
         }));
     }
 
+    public async findByUserAndCriterion(userId: string, criterion: string): Promise<{
+        achievementId: string;
+        achievementName: string;
+        achievementCriterion: string;
+    } | null> {
+        const userAchievement = await Prisma.userAchievements.findFirst({
+            where: {
+                userId,
+                achievement: {
+                    criterion: criterion,
+                },
+                user: {
+                    deletedAt: null,
+                }
+            },
+            include: {
+                achievement: true,
+            }
+        });
+
+        if (userAchievement == null) {
+            return null;
+        }
+
+        return {
+            achievementId: userAchievement.achievement.id,
+            achievementName: userAchievement.achievement.name,
+            achievementCriterion: userAchievement.achievement.criterion,
+        };
+    }
+
     public async create(userId: string, achievementIds: string[]): Promise<{
         id: string;
         userId: string;

@@ -2,8 +2,10 @@ import UserAchievementsRepository from "../../../domain/repositories/userAchieve
 import AchievementsRepository from "../../../domain/repositories/achivement/AchievementRepository";
 import UserRepository from "../../../domain/repositories/user/UserRepository";
 import { NotFoundError } from "../../../shared/utils/ApiError";
+import { AchievementEnum } from "../../../domain/repositories/achivement/AchievementEnum";
 
 export default class UserAchievementsService {
+
     private readonly xpPerAction = 100;
     private readonly xpToLevelUp = 1000;
     private readonly firstParticipationBonus = 50;
@@ -22,8 +24,8 @@ export default class UserAchievementsService {
 
         await Promise.all([
             this.handleActivityParticipation(userId, creatorId),
-            this.assignAchievementIfNotExists(userId, "first-check-in"),
-            this.assignAchievementIfNotExists(creatorId, "activity-created")
+            this.assignAchievementIfNotExists(userId, AchievementEnum.FIRST_CHECK_IN),
+            this.assignAchievementIfNotExists(creatorId, AchievementEnum.ACTIVITY_CREATED)
         ]);
     }
 
@@ -35,30 +37,24 @@ export default class UserAchievementsService {
             throw new NotFoundError("User or creator not found.");
         }
 
-        // Inicializa XP se for null
         if (user.xp == null) {
             user.xp = 0;
         }
         user.xp += this.xpPerAction;
 
-        // Verifica se é a primeira participação do usuário
-        const hasJoinedActivityBefore = await this.userAchievementsRepository.findByUser(userId);
-        if (hasJoinedActivityBefore.length === 0) {
+        if (await this.hasAchievement(userId, AchievementEnum.FIRST_ACTIVITY_JOIN) === false) {
             user.xp += this.firstParticipationBonus;
-            await this.assignAchievementIfNotExists(userId, "first-activity-join");
+            await this.assignAchievementIfNotExists(userId, AchievementEnum.FIRST_ACTIVITY_JOIN);
         }
 
-        // Inicializa XP do criador se for null
         if (creator.xp == null) {
             creator.xp = 0;
         }
         creator.xp += this.xpPerAction;
 
-        // Verifica se é a primeira atividade criada pelo usuário
-        const hasCreatedActivityBefore = await this.userAchievementsRepository.findByUser(creatorId);
-        if (hasCreatedActivityBefore.length === 0) {
+        if (await this.hasAchievement(creatorId, AchievementEnum.FIRST_ACTIVITY_CREATED) === false) {
             creator.xp += this.firstCreationBonus;
-            await this.assignAchievementIfNotExists(creatorId, "first-activity-created");
+            await this.assignAchievementIfNotExists(creatorId, AchievementEnum.FIRST_ACTIVITY_CREATED);
         }
 
         await Promise.all([
@@ -79,27 +75,27 @@ export default class UserAchievementsService {
 
         user.xp = newXp;
 
-        // Inicializa nível se for null
         if (user.level == null) {
             user.level = 1;
         }
 
-        // Subir de nível se atingir XP suficiente
         if (user.xp >= this.xpToLevelUp) {
             user.level += 1;
             user.xp -= this.xpToLevelUp;
 
-            await this.assignAchievementIfNotExists(userId, "level-up");
+            await this.assignAchievementIfNotExists(userId, AchievementEnum.LEVEL_UP);
         }
 
         await this.userRepository.update(userId, { xp: user.xp, level: user.level });
     }
 
-    private async assignAchievementIfNotExists(userId: string, criterion: string): Promise<void> {
-        const existingAchievements = await this.userAchievementsRepository.findByUser(userId);
-        const hasAchievement = existingAchievements.some(a => a.achievementCriterion === criterion);
+    private async hasAchievement(userId: string, criterion: AchievementEnum): Promise<boolean> {
+        const existingAchievement = await this.userAchievementsRepository.findByUserAndCriterion(userId, criterion);
+        return existingAchievement != null;
+    }
 
-        if (!hasAchievement) {
+    private async assignAchievementIfNotExists(userId: string, criterion: AchievementEnum): Promise<void> {
+        if (await this.hasAchievement(userId, criterion) === false) {
             const achievement = await this.achievementsRepository.findByCriterion(criterion);
             if (achievement != null) {
                 await this.userAchievementsRepository.create(userId, [achievement.id]);
