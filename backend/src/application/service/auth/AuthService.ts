@@ -3,6 +3,7 @@ import UserService from "../../../application/service/user/UserService";
 import { PasswordService } from "../password/PasswordService ";
 import { UnauthorizedError, NotFoundError } from "../../../shared/utils/ApiError";
 import { UserCreateDTO } from "../../../presentation/dto/user/UserDTO";
+import { AuhtLoginDTO } from "../../../presentation/dto/auth/AuthLoginDTO";
 
 export default class AuthService {
 
@@ -29,10 +30,10 @@ export default class AuthService {
         return user;
     }
 
-    async login(email: string, password: string): Promise<{ token: string }> {
-        const user = await this.userService.findByEmail(email);
+    async login(dto: AuhtLoginDTO): Promise<{ token: string }> {
+        const user = await this.userService.findByEmail(dto.email);
 
-        await this.passwordService.verifyPassword(user.password, password);
+        await this.passwordService.verifyPassword(user.password, dto.password);
 
         const token = this.generateToken({ id: user.id, email: user.email });
 

@@ -27,9 +27,7 @@ function handleUpdate(userService: UserService) {
     return async (request: Request, response: Response) => {
         const id = request.userId!;
         const { name, email, password, avatar } = request.body;
-        const dto = new UserUpdateDTO(name, email, password, avatar);
-
-        const updatedUser = await userService.update(id, dto);
+        const updatedUser = await userService.update(id, new UserUpdateDTO(name, email, password, avatar));
         response.status(200).json(updatedUser);
     };
 }

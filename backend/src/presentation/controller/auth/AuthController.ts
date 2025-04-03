@@ -1,6 +1,7 @@
 import { Application, Router, Request, Response } from "express";
 import AuthService from "../../../application/service/auth/AuthService";
 import { UserCreateDTO } from "../../dto/user/UserDTO";
+import { AuhtLoginDTO } from "../../dto/auth/AuthLoginDTO";
 
 export default function authController(server: Application): void {
     const router = Router();
@@ -13,18 +14,18 @@ export default function authController(server: Application): void {
 }
 
 function handleSignIn(authService: AuthService) {
-    return async (req: Request, res: Response) => {
-        const { email, password } = req.body;
-        const authData = await authService.login(email, password);
-        res.status(200).json(authData);
+    return async (request: Request, response: Response) => {
+        const { email, password } = request.body;
+        const authData = await authService.login(new AuhtLoginDTO(email, password));
+        response.status(200).json(authData);
     };
 }
 
 function handleRegister(authService: AuthService) {
-    return async (req: Request, res: Response) => {
-        const { name, email, cpf, password, avatar } = req.body;
+    return async (request: Request, response: Response) => {
+        const { name, email, cpf, password, avatar } = request.body;
         const dto = new UserCreateDTO(name, email, cpf, password, avatar);
         const user = await authService.register(dto);
-        res.status(201).json(user);
+        response.status(201).json(user);
     };
 }

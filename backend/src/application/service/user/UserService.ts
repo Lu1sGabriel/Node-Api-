@@ -24,19 +24,35 @@ export default class UserService implements IUserService {
         await this.validateUniqueFields(dto.email, dto.cpf);
 
         const hashedPassword = await this.passwordService.hashPassword(dto.password);
-        const userData = this.buildUserData(dto, hashedPassword);
+        const userData = {
+            name: dto.name,
+            email: dto.email,
+            cpf: dto.cpf,
+            password: hashedPassword,
+            avatar: dto.avatar
+        }
 
         return this.userRepository.create(userData);
     }
 
     public async update(id: string, dto: UserUpdateDTO): Promise<any> {
-        const user = await this.findUserById(id);
-
         await this.validateFields(dto, true);
 
-        Object.assign(user, this.buildUpdateData(dto));
+        const user = await this.findUserById(id);
 
-        return this.userRepository.update(id, user);
+        let hashedPassword = user.password;
+        if (dto.password) {
+            hashedPassword = await this.passwordService.hashPassword(dto.password);
+        }
+
+        const updatedUser = {
+            name: dto.name ?? user.name,
+            email: dto.email ?? user.email,
+            password: hashedPassword,
+            avatar: dto.avatar ?? user.avatar,
+        };
+
+        return this.userRepository.update(id, updatedUser);
     }
 
     public async findById(id: string): Promise<any> {
@@ -48,6 +64,11 @@ export default class UserService implements IUserService {
         if (!user) {
             throw new NotFoundError("User not found. ");
         }
+
+        if (user.deletedAt) {
+            throw new BadRequestError("This user is disabled. Please contact support for assistance.");
+        }
+
         return user;
     }
 
@@ -92,28 +113,12 @@ export default class UserService implements IUserService {
         if (!user) {
             throw new NotFoundError("User not found.");
         }
+
+        if (user.deletedAt) {
+            throw new BadRequestError("This user is disabled. Please contact support for assistance.");
+        }
+
         return user;
-    }
-
-    private buildUserData(dto: UserCreateDTO, hashedPassword: string): any {
-        return {
-            name: dto.name,
-            email: dto.email,
-            cpf: dto.cpf,
-            password: hashedPassword,
-            avatar: dto.avatar || "default-avatar.png",
-            xp: 0,
-            level: 1,
-        };
-    }
-
-    private buildUpdateData(dto: UserUpdateDTO): Partial<any> {
-        const updatedData: Partial<any> = {};
-        if (dto.name) updatedData.name = dto.name;
-        if (dto.email) updatedData.email = dto.email;
-        if (dto.password) updatedData.password = dto.password;
-        if (dto.avatar) updatedData.avatar = dto.avatar;
-        return updatedData;
     }
 
 }

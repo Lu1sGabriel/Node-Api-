@@ -1,31 +1,41 @@
-import { Express, Request, Response, Router } from 'express';
-import PreferencesService from '../../../application/service/preference/PreferencesService';
-import { PreferencesCreateDTO } from '../../dto/preference/PreferenceDTO';
+import { Express, Request, Response, Router } from "express";
+import PreferencesService from "../../../application/service/preference/PreferencesService";
+import { PreferencesCreateDTO } from "../../dto/preference/PreferenceDTO";
+import authGuard from "../../../infrastructure/middleware/AuthGuard";
 
-export default function PreferencesController(server: Express): void {
-
+export default function preferencesController(server: Express): void {
     const router = Router();
     const preferencesService = new PreferencesService();
-    server.use('/user/preferences', router);
 
-    router.get("/:userId", async (request: Request, response: Response) => {
-        const { userId } = request.params;
+    server.use("/user/preferences", router);
+
+    router.get("/", authGuard, handleGetPreferences(preferencesService));
+    router.post("/define", authGuard, handleDefinePreferences(preferencesService));
+    router.delete("/delete", authGuard, handleDeletePreferences(preferencesService));
+}
+
+function handleGetPreferences(preferencesService: PreferencesService) {
+    return async (request: Request, response: Response) => {
+        const userId = request.userId!;
         const preferences = await preferencesService.findByUser(userId);
         response.status(200).json(preferences);
-    });
+    };
+}
 
-    router.post("/define", async (request: Request, response: Response) => {
-        const { userId, typeId } = request.body;
+function handleDefinePreferences(preferencesService: PreferencesService) {
+    return async (request: Request, response: Response) => {
+        const userId = request.userId!;
+        const { typeId } = request.body;
         const dto = new PreferencesCreateDTO(userId, typeId);
         const preferences = await preferencesService.create(dto);
         response.status(201).json(preferences);
-    });
+    };
+}
 
-    router.delete("/delete", async (request: Request, response: Response) => {
+function handleDeletePreferences(preferencesService: PreferencesService) {
+    return async (request: Request, response: Response) => {
         const { preferenceIds } = request.body;
-
         await preferencesService.delete(preferenceIds);
-        response.status(204).end();
-    });
-
+        response.sendStatus(204);
+    };
 }
