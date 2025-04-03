@@ -48,15 +48,13 @@ export default class UserRepository {
         };
     }
 
-    public async findByEmail(email: string): Promise<boolean> {
-        const user = await Prisma.users.findUnique({
+    public async findByEmail(email: string): Promise<any | null> {
+        return await Prisma.users.findUnique({
             where: {
                 email,
                 deletedAt: null,
             },
         });
-
-        return !!user;
     }
 
     public async findByCpf(cpf: string): Promise<boolean> {

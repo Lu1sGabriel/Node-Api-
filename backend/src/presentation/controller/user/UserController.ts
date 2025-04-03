@@ -1,43 +1,43 @@
-import { Express, Router, Request, Response } from "express";
+import { Router, Request, Response, Express } from "express";
 import UserService from "../../../application/service/user/UserService";
-import { UserCreateDTO, UserUpdateDTO } from "../../dto/user/UserDTO";
+import authGuard from "../../../infrastructure/middleware/AuthGuard";
+import { UserUpdateDTO } from "../../dto/user/UserDTO";
 
-export default function UserController(server: Express): void {
-
+export default function userController(server: Express): void {
     const router = Router();
     const userService = new UserService();
 
     server.use("/user", router);
 
-    router.get("/:id", async (req: Request, res: Response) => {
-        const { id } = req.params;
+    router.route("/")
+        .get(authGuard, handleGetById(userService))
+        .put(authGuard, handleUpdate(userService))
+        .delete(authGuard, handleDelete(userService));
+}
+
+function handleGetById(userService: UserService) {
+    return async (request: Request, response: Response) => {
+        const id = request.userId!;
         const user = await userService.findById(id);
+        response.status(200).json(user);
+    };
+}
 
-        res.status(200).json(user);
-    });
-
-    router.post("/register", async (req: Request, res: Response) => {
-        const { name, email, cpf, password, avatar } = req.body;
-        const dto = new UserCreateDTO(name, email, cpf, password, avatar);
-
-        const user = await userService.create(dto);
-        res.status(201).json(user);
-    });
-
-    router.put("/:id", async (req: Request, res: Response) => {
-        const { id } = req.params;
-        const { name, email, password, avatar } = req.body;
+function handleUpdate(userService: UserService) {
+    return async (request: Request, response: Response) => {
+        const id = request.userId!;
+        const { name, email, password, avatar } = request.body;
         const dto = new UserUpdateDTO(name, email, password, avatar);
 
         const updatedUser = await userService.update(id, dto);
-        res.status(200).json(updatedUser);
-    });
+        response.status(200).json(updatedUser);
+    };
+}
 
-    router.delete("/:id", async (req: Request, res: Response) => {
-        const { id } = req.params;
+function handleDelete(userService: UserService) {
+    return async (request: Request, response: Response) => {
+        const id = request.userId!;
         await userService.delete(id);
-
-        res.status(204);
-    });
-
+        response.sendStatus(204);
+    };
 }
