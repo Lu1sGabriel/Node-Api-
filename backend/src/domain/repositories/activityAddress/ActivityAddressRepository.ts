@@ -2,66 +2,50 @@ import Prisma from "../../../infrastructure/orm/Prisma";
 
 export default class ActivityAddressRepository {
 
-    public async findByActivity(activityId: string): Promise<{
-        id: string;
-        latitude: number;
-        longitude: number;
-    } | null> {
+    public async findById(id: string): Promise<any | null> {
         const address = await Prisma.activityAddresses.findUnique({
-            where: {
-                activityId
-            }
+            where: { id },
         });
 
-        if (address == null) {
-            return null;
-        }
+        if (!address) return null;
 
-        return {
-            id: address.id,
-            latitude: address.latitude,
-            longitude: address.longitude
-        };
+        return this.mapAddressData(address);
+
     }
 
-    public async create(activityId: string, latitude: number, longitude: number): Promise<{
-        id: string;
-        latitude: number;
-        longitude: number;
-    }> {
-        const newAddress = await Prisma.activityAddresses.create({
-            data: {
-                activityId,
-                latitude,
-                longitude
-            }
+    public async findByActivity(activityId: string): Promise<any | null> {
+        const address = await Prisma.activityAddresses.findUnique({
+            where: { activityId },
         });
 
-        return {
-            id: newAddress.id,
-            latitude: newAddress.latitude,
-            longitude: newAddress.longitude
-        };
+        if (!address) return null;
+
+        return this.mapAddressData(address);
     }
 
-    public async update(activityId: string, latitude: number, longitude: number): Promise<void> {
-        await Prisma.activityAddresses.update({
-            where: {
-                activityId
-            },
-            data: {
-                latitude,
-                longitude
-            }
+    public async create(data: { activityId: string; latitude: number; longitude: number }): Promise<any> {
+        const newAddress = await Prisma.activityAddresses.create({ data });
+
+        return this.mapAddressData(newAddress);
+    }
+
+    public async update(activityId: string, data: Partial<{ latitude: number; longitude: number }>): Promise<any> {
+        return Prisma.activityAddresses.update({
+            where: { activityId },
+            data,
         });
     }
 
     public async delete(activityId: string): Promise<void> {
-        await Prisma.activityAddresses.delete({
-            where: {
-                activityId
-            }
-        });
+        await Prisma.activityAddresses.delete({ where: { activityId } });
+    }
+
+    private mapAddressData(address: any) {
+        return {
+            id: address.id,
+            latitude: address.latitude,
+            longitude: address.longitude,
+        };
     }
 
 }
