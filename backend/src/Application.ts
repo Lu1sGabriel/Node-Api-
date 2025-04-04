@@ -5,7 +5,7 @@ import cors from "cors";
 
 import UserController from "./presentation/controller/user/UserController";
 import PreferencesController from "./presentation/controller/preference/PreferenceController";
-import middlewareError from "./infrastructure/middleware/Error";
+import middlewareError from "./infrastructure/middleware/ExceptionHandler";
 import AuthController from "./presentation/controller/auth/AuthController";
 
 const server = express();
