@@ -11,17 +11,29 @@ export default class UserRepository {
             },
         });
 
-        if (!user) return null;
+        if (!user) {
+            return null;
+        }
 
         return this.mapUserData(user);
     }
 
     public async findByEmail(email: string): Promise<any | null> {
-        return Prisma.users.findUnique({ where: { email } });
+        return Prisma.users.findUnique({
+            where: {
+                email,
+                deletedAt: null // Aqui está correto: separado por vírgula
+            }
+        });
     }
 
     public async findByCpf(cpf: string): Promise<boolean> {
-        return !!(await Prisma.users.findUnique({ where: { cpf } }));
+        return !!(await Prisma.users.findUnique({
+            where: {
+                cpf,
+                deletedAt: null // Correção aqui também
+            }
+        }));
     }
 
     public async create(data: { name: string; email: string; cpf: string; password: string; avatar?: string }): Promise<any> {

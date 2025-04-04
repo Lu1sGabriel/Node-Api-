@@ -7,10 +7,11 @@ export default class ActivityAddressRepository {
             where: { id },
         });
 
-        if (!address) return null;
+        if (!address) {
+            return null;
+        }
 
         return this.mapAddressData(address);
-
     }
 
     public async findByActivity(activityId: string): Promise<any | null> {
@@ -18,14 +19,15 @@ export default class ActivityAddressRepository {
             where: { activityId },
         });
 
-        if (!address) return null;
+        if (!address) {
+            return null;
+        }
 
         return this.mapAddressData(address);
     }
 
     public async create(data: { activityId: string; latitude: number; longitude: number }): Promise<any> {
         const newAddress = await Prisma.activityAddresses.create({ data });
-
         return this.mapAddressData(newAddress);
     }
 
