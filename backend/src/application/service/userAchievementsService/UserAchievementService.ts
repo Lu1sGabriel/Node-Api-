@@ -6,83 +6,85 @@ import { AchievementEnum } from "../../../domain/repositories/achivement/Achieve
 import { IUserAchievementService } from "./IUserAchievementService";
 
 export default class UserAchievementService implements IUserAchievementService {
-
     private readonly xpPerAction = 100;
     private readonly xpToLevelUp = 1000;
     private readonly firstParticipationBonus = 50;
     private readonly firstCreationBonus = 50;
+    private readonly firstCompletionBonus = 50;
+    private readonly repeatedCompletionXP = 25;
 
-    public constructor(
+    constructor(
         private readonly userAchievementsRepository = new UserAchievementRepository(),
         private readonly achievementsRepository = new AchievementRepository(),
         private readonly userRepository = new UserRepository()
     ) { }
 
     public async confirmActivityParticipation(userId: string, creatorId: string): Promise<void> {
-        if (userId == null || creatorId == null) {
-            throw new NotFoundError("User ID and Creator ID are required.");
-        }
+        this.validateUserIds(userId, creatorId);
 
-        await Promise.all([
-            this.handleActivityParticipation(userId, creatorId),
-            this.assignAchievementIfNotExists(userId, AchievementEnum.FIRST_CHECK_IN),
-            this.assignAchievementIfNotExists(creatorId, AchievementEnum.ACTIVITY_CREATED)
-        ]);
+        await this.handleActivityParticipation(userId, creatorId);
+
+        if (!(await this.hasAchievement(userId, AchievementEnum.FIRST_CHECK_IN))) {
+            await this.assignAchievementIfNotExists(userId, AchievementEnum.FIRST_CHECK_IN);
+        }
     }
 
+    public async completeActivity(userId: string): Promise<void> {
+        this.validateUserId(userId);
+
+        const hasMasterExplorer = await this.hasAchievement(userId, AchievementEnum.MASTER_EXPLORER);
+        if (!hasMasterExplorer) {
+            await this.assignAchievementIfNotExists(userId, AchievementEnum.MASTER_EXPLORER);
+            await this.incrementUserXp(userId, this.firstCompletionBonus);
+        } else {
+            await this.incrementUserXp(userId, this.repeatedCompletionXP);
+        }
+
+        await this.checkAndAssignAchievements(userId, { isCompletion: true });
+    }
+
+
     private async handleActivityParticipation(userId: string, creatorId: string): Promise<void> {
-        const user = await this.userRepository.findById(userId);
-        const creator = await this.userRepository.findById(creatorId);
+        await this.getUserOrThrow(userId);
+        await this.getUserOrThrow(creatorId);
 
-        if (user == null || creator == null) {
-            throw new NotFoundError("User or creator not found.");
-        }
-
-        if (user.xp == null) {
-            user.xp = 0;
-        }
-        user.xp += this.xpPerAction;
+        await this.incrementUserXp(userId, this.xpPerAction);
+        await this.incrementUserXp(creatorId, this.xpPerAction);
 
         if (!(await this.hasAchievement(userId, AchievementEnum.FIRST_ACTIVITY_JOIN))) {
-            user.xp += this.firstParticipationBonus;
+            await this.incrementUserXp(userId, this.firstParticipationBonus);
             await this.assignAchievementIfNotExists(userId, AchievementEnum.FIRST_ACTIVITY_JOIN);
         }
 
-        if (creator.xp == null) {
-            creator.xp = 0;
-        }
-        creator.xp += this.xpPerAction;
-
         if (!(await this.hasAchievement(creatorId, AchievementEnum.FIRST_ACTIVITY_CREATED))) {
-            creator.xp += this.firstCreationBonus;
+            await this.incrementUserXp(creatorId, this.firstCreationBonus);
             await this.assignAchievementIfNotExists(creatorId, AchievementEnum.FIRST_ACTIVITY_CREATED);
         }
 
-        await Promise.all([
-            this.incrementUserXp(userId, user.xp),
-            this.incrementUserXp(creatorId, creator.xp)
-        ]);
+        await this.checkAndAssignAchievements(userId, { isCreator: false });
+        await this.checkAndAssignAchievements(creatorId, { isCreator: true });
     }
 
-    public async incrementUserXp(userId: string, newXp: number): Promise<void> { // Agora é público
-        const user = await this.userRepository.findById(userId);
-        if (user == null) {
-            throw new NotFoundError("User not found.");
-        }
+    public async handleActivityCreation(userId: string): Promise<void> {
+        this.validateUserId(userId);
 
-        if (user.deletedAt != null) {
-            throw new NotFoundError("User is inactive.");
-        }
+        await this.incrementUserXp(userId, this.firstCreationBonus);
+        await this.assignAchievementIfNotExists(userId, AchievementEnum.FIRST_ACTIVITY_CREATED);
 
-        user.xp = newXp;
+        await this.checkAndAssignAchievements(userId, { isCreator: true });
+    }
 
-        if (user.level == null) {
-            user.level = 1;
-        }
+    public async incrementUserXp(userId: string, xpAmount: number): Promise<void> {
+        const user = await this.getUserOrThrow(userId);
+
+        user.xp += xpAmount;
 
         if (user.xp >= this.xpToLevelUp) {
             user.level += 1;
             user.xp -= this.xpToLevelUp;
+
+            const levelUpBonus = user.level * 10;
+            user.xp += levelUpBonus;
 
             await this.assignAchievementIfNotExists(userId, AchievementEnum.LEVEL_UP);
         }
@@ -98,9 +100,50 @@ export default class UserAchievementService implements IUserAchievementService {
     public async assignAchievementIfNotExists(userId: string, criterion: AchievementEnum): Promise<void> {
         if (!(await this.hasAchievement(userId, criterion))) {
             const achievement = await this.achievementsRepository.findByCriterion(criterion);
-            if (achievement != null) {
+            if (achievement) {
                 await this.userAchievementsRepository.create(userId, [achievement.id]);
             }
+        }
+    }
+
+    private async checkAndAssignAchievements(userId: string, context: { isCreator?: boolean, isCompletion?: boolean }) {
+        if (context.isCreator) {
+            await this.assignAchievementIfNotExists(userId, AchievementEnum.EVENT_ORGANIZER);
+        }
+
+        if (context.isCompletion) {
+            const hasMasterExplorer = await this.hasAchievement(userId, AchievementEnum.MASTER_EXPLORER);
+            if (!hasMasterExplorer) {
+                await this.assignAchievementIfNotExists(userId, AchievementEnum.MASTER_EXPLORER);
+                await this.incrementUserXp(userId, this.firstCompletionBonus);
+            } else {
+                await this.incrementUserXp(userId, this.repeatedCompletionXP);
+            }
+        }
+
+        const user = await this.getUserOrThrow(userId);
+        if (user.level >= 5) {
+            await this.assignAchievementIfNotExists(userId, AchievementEnum.SOCIAL_BUTTERFLY);
+        }
+    }
+
+    private async getUserOrThrow(userId: string): Promise<any> {
+        const user = await this.userRepository.findById(userId);
+        if (!user || user.deletedAt) {
+            throw new NotFoundError("User not found or inactive.");
+        }
+        return user;
+    }
+
+    private validateUserIds(userId: string, creatorId: string): void {
+        if (!userId || !creatorId) {
+            throw new NotFoundError("User ID and Creator ID are required.");
+        }
+    }
+
+    private validateUserId(userId: string): void {
+        if (!userId) {
+            throw new NotFoundError("User ID is required.");
         }
     }
 

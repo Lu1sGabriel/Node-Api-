@@ -29,6 +29,26 @@ export default class UserAchievementRepository {
         return this.mapUserAchievementData(userAchievement);
     }
 
+
+    public async countUserParticipations(userId: string): Promise<number> {
+        return Prisma.activityParticipants.count({
+            where: {
+                userId,
+                user: { deletedAt: null },
+            },
+        });
+    }
+
+    public async countAchievementsByCriterion(userId: string, criterion: string): Promise<number> {
+        return Prisma.userAchievements.count({
+            where: {
+                userId,
+                achievement: { criterion },
+                user: { deletedAt: null },
+            },
+        });
+    }
+
     public async create(userId: string, achievementIds: string[]): Promise<any[]> {
         const createdAchievements: any[] = [];
 
@@ -54,6 +74,7 @@ export default class UserAchievementRepository {
         });
     }
 
+
     private mapUserAchievementData(userAchievement: any) {
         return {
             achievementId: userAchievement.achievement.id,
@@ -61,5 +82,4 @@ export default class UserAchievementRepository {
             achievementCriterion: userAchievement.achievement.criterion,
         };
     }
-
-}
+} 

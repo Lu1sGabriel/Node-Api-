@@ -1,16 +1,27 @@
 import Prisma from "../../../infrastructure/orm/Prisma";
 
 export default class ActivityParticipantRepository {
+
     public async findByActivity(activityId: string): Promise<any[]> {
-        const participants = await Prisma.activityParticipants.findMany({
+        return Prisma.activityParticipants.findMany({
             where: {
                 activityId,
                 user: { deletedAt: null }
             },
             include: { user: true },
             orderBy: { confirmedAt: "asc" }
+        }).then(participants => participants.map(this.mapParticipantData));
+    }
+
+    public async findParticipantById(participantId: string): Promise<any | null> {
+        const participant = await Prisma.activityParticipants.findUnique({
+            where: { id: participantId },
+            include: { user: true }
         });
-        return participants.map(this.mapParticipantData);
+
+        if (!participant) return null;
+
+        return this.mapParticipantData(participant);
     }
 
     public async findByUser(userId: string): Promise<any[]> {
